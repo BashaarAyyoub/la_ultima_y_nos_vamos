@@ -1,0 +1,5 @@
+pytest
+gradio
+transformers
+pytest
+bcrypt
