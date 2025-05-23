@@ -1,21 +1,31 @@
-import json
-import os
+from bson import ObjectId
+from src.config import db  # Tu conexión a MongoDB
 
 class EncuestaRepository:
-    def __init__(self, ruta_archivo="data/encuestas.json"):
-        self.ruta = ruta_archivo
-        if not os.path.exists("data"):
-            os.makedirs("data")
-        if not os.path.exists(self.ruta):
-            with open(self.ruta, "w") as f:
-                json.dump([], f)
+    def __init__(self):
+        self.collection = db["encuestas"]
 
-    def guardar_encuesta(self, encuesta_dict):
-        encuestas = self.cargar_todas()
-        encuestas.append(encuesta_dict)
-        with open(self.ruta, "w") as f:
-            json.dump(encuestas, f, indent=4)
+    def crear_encuesta(self, encuesta_dict):
+        result = self.collection.insert_one(encuesta_dict)
+        return str(result.inserted_id)
 
-    def cargar_todas(self):
-        with open(self.ruta, "r") as f:
-            return json.load(f)
+    def obtener_encuesta(self, encuesta_id):
+        return self.collection.find_one({"_id": ObjectId(encuesta_id)})
+
+    def cerrar_encuesta(self, encuesta_id):
+        self.collection.update_one(
+            {"_id": ObjectId(encuesta_id)},
+            {"$set": {"estado": "cerrada"}}
+        )
+
+    def listar_encuestas(self):
+        return list(self.collection.find())
+from src.repositories.encuesta_repo import EncuestaRepository
+
+repo = EncuestaRepository()
+id = repo.crear_encuesta({
+    "pregunta": "¿Pizza o hamburguesa?",
+    "opciones": ["Pizza", "Hamburguesa"],
+    "estado": "activa"
+})
+print("Encuesta creada con ID:", id)

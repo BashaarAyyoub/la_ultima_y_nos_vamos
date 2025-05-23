@@ -53,3 +53,7 @@ class PollService:
             "duracion_segundos": encuesta.duracion.total_seconds(),
             "tipo": encuesta.tipo
         }
+    def crear_encuesta(self, pregunta, opciones, tipo, duracion):
+    encuesta = Encuesta(pregunta, opciones, tipo, duracion)
+    return self.encuesta_repo.crear_encuesta(encuesta.to_dict())
+
